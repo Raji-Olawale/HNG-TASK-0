@@ -50,7 +50,7 @@ main {
 .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 1rem;
   gap: 1rem;
 }
@@ -111,6 +111,17 @@ main {
   font-size: 0.95rem;
 }
 
+.overdue-indicator {
+  display: none;
+  background: #f56565;
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
 .time-remaining {
   background: #edf2f7;
   color: #e53e3e;
@@ -123,6 +134,9 @@ main {
 
 /* Status Section */
 .status-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
@@ -212,6 +226,31 @@ main {
   background: #e53e3e;
 }
 
+.btn-toggle-details {
+  background: #4299e1;
+  color: white;
+  width: auto;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.btn-toggle-details:hover {
+  background: #553c9a;
+}
+
+.toggle-icon {
+  transition: transform 0.2s ease;
+  font-size: 0.8em;
+}
+
+.btn-toggle-details[aria-expanded="true"] .toggle-icon {
+  transform: rotate(0deg);
+}
+
+.btn-toggle-details[aria-expanded="false"] .toggle-icon {
+  transform: rotate(-90deg);
+}
+
 /* Responsive Design */
 @media (max-width: 640px) {
   .todo-card {
@@ -251,4 +290,244 @@ main {
 
 .status-badge.completed {
   background: #f6ad55;
+}
+
+/* Status control - segmented pill style */
+[data-testid="test-todo-status-control"] {
+  appearance: none;
+  background: #f7fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 25px;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4a5568;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+[data-testid="test-todo-status-control"]:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Status badge colors */
+.status-badge.status-pending { background: #ed8936; } /* orange */
+.status-badge.status-in-progress { background: #4299e1; } /* blue */
+.status-badge.status-done { background: #48bb78; } /* green */
+.status-badge.status-done.completed { background: #38a169; }
+
+/* Edit Mode */
+
+
+/* Modal Styles (Replaces edit-mode) */
+.backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+}
+
+.backdrop:not(.hidden) {
+  display: block;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 500px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 50px 100px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  overflow-y: auto;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal:not(.hidden) {
+  display: block;
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #a0aec0;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: #f7fafc;
+  color: #4a5568;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-actions {
+  padding: 0 1.5rem 1.5rem;
+  display: flex;
+  gap: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* Edit fields reuse */
+.modal .edit-field,
+.modal .edit-field-group {
+  margin-bottom: 1.25rem;
+}
+
+/* Priority colors */
+.priority-low { background: #48bb78; }
+.priority-medium { background: #ed8936; }
+.priority-high { background: #f56565; }
+
+.hidden {
+  display: none !important;
+}
+
+/* Responsive modal */
+@media (max-width: 640px) {
+  .modal {
+    width: 95vw;
+    margin: 2rem auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: none;
+    height: fit-content;
+    max-height: 90vh;
+  }
+  
+  .modal:not(.hidden) {
+    transform: none;
+  }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.edit-field, .edit-field-group {
+  margin-bottom: 1.25rem;
+}
+
+.edit-field label,
+.edit-field-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.9rem;
+}
+
+.edit-field input,
+.edit-field textarea,
+.edit-field select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.edit-field input:focus,
+.edit-field textarea:focus,
+.edit-field select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.edit-field textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.edit-field-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.edit-field-group > div {
+  flex: 1;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn-save {
+  background: #48bb78;
+  color: white;
+  flex: 1;
+}
+
+.btn-save:hover {
+  background: #38a169;
+}
+
+.btn-cancel {
+  background: #a0aec0;
+  color: white;
+  flex: 1;
+}
+
+.btn-cancel:hover {
+  background: #718096;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .edit-field-group {
+    flex-direction: column;
+    gap: 0;
+  }
 }
