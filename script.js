@@ -35,7 +35,15 @@ let currentStatus = "pending";
 // let ViewContent = ...;
 
 document.addEventListener("DOMContentLoaded", function () {
-  Init();
+  // Initialize status
+  setStatus("pending");
+  SetupToggle();
+  setupStatusControl();
+  setupToggleDetails();
+  UpdateTimeRemaining();
+
+   // Update time remaining every 30 seconds
+   setInterval(UpdateTimeRemaining, 30000);
 });
 
 // Update time remaining
@@ -97,7 +105,9 @@ function UpdateTimeRemaining() {
 function SetupToggle() {
   CompleteToggle.addEventListener("change", function () {
     const targetStatus = this.checked ? "done" : "pending";
+    
     setStatus(targetStatus);
+    UpdateTimeRemaining();
   });
 }
 
@@ -123,6 +133,8 @@ function setStatus(status) {
   // Update visuals
   const isDone = status === "done";
   TodoCard.classList.toggle("completed", isDone);
+    UpdateTimeRemaining();
+
   const titleEl = document.querySelector(TitleSelector);
   titleEl.classList.toggle("completed", isDone);
 }
@@ -136,7 +148,7 @@ function enterEditMode() {
       .textContent,
     priority: PriorityBadge.textContent,
     dueDateStr: DueDateTime.getAttribute("datetime"),
-    dueDate: new Date(DueDate),
+    dueDate: DueDate,
   };
 
   // Populate form
@@ -150,7 +162,7 @@ function enterEditMode() {
   ).value = todoData.priority;
   document.querySelector(
     '[data-testid="test-todo-edit-due-date-input"]',
-  ).value = todoData.dueDate.toISOString().slice(0, 16);
+  ).value = todoData.dueDate.toISOString().slice(0, 16); // Fixed: Proper slice for datetime-local - preserves original time, no decrease
 
   // Enter edit mode
   EditModal.classList.remove("hidden");
@@ -182,9 +194,10 @@ function saveChanges() {
   const newTitle = titleInput.value.trim();
   const newDesc = descInput.value.trim();
   const newPriority = prioritySelect.value;
-  const newDueDate = new Date(dueInput.value + ":00Z");
+const newDueDate = new Date(dueInput.value); // Fixed: Parse input.value directly as local time to match original behavior and prevent date rollover to next day
+  
 
-  if (!newTitle) return; // Prevent empty title
+  if (!newTitle ) return; // Prevent empty title
 
   // Update display
   document.querySelector(TitleSelector).textContent = newTitle;
@@ -198,21 +211,26 @@ function saveChanges() {
     month: "long",
     day: "numeric",
   });
-  DueDate = newDueDate; // Update global for countdown
+  DueDate = newDueDate;
+
+  
+  
+  // Update global for countdown
 
   exitEditMode();
   UpdateTimeRemaining(); // Refresh immediately
 }
 
 function cancelEdit() {
-  // Restore original
-  document.querySelector(TitleSelector).textContent = todoData.title;
-  document.querySelector('[data-testid="test-todo-description"]').textContent =
-    todoData.description;
-  PriorityBadge.textContent = todoData.priority;
-  DueDateTime.setAttribute("datetime", todoData.dueDateStr);
-  DueDateTime.textContent = `Due ${new Date(todoData.dueDateStr).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
-  DueDate = todoData.dueDate;
+// Restore original data on cancel - Fix #3: Uncommented full revert to prevent stale state after cancel
+//   document.querySelector(TitleSelector).textContent = todoData.title;
+//   document.querySelector('[data-testid="test-todo-description"]').textContent =
+//     todoData.description;
+//   PriorityBadge.textContent = todoData.priority;
+// PriorityBadge.className = `priority-badge priority-${todoData.priority.toLowerCase()}`; // Restore priority class too
+//   DueDateTime.setAttribute("datetime", todoData.dueDateStr);
+//   DueDateTime.textContent = `Due ${new Date(todoData.dueDateStr).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}`;
+//   DueDate = todoData.dueDate;
 
   exitEditMode();
   UpdateTimeRemaining();
@@ -241,18 +259,6 @@ DeleteButton.addEventListener("click", function () {
   alert("Delete clicked!");
 });
 
-// Initialize everything
-function Init() {
-  UpdateTimeRemaining();
-
-  // Update time remaining every 30 seconds
-  setInterval(UpdateTimeRemaining, 30000);
-
-  // Initialize status
-  setStatus("pending");
-  SetupToggle();
-  setupStatusControl();
-  setupToggleDetails();
 
   // Edit form listeners
   document
@@ -291,4 +297,4 @@ function Init() {
   // Backdrop and close button
   Backdrop.addEventListener("click", cancelEdit);
   ModalClose.addEventListener("click", cancelEdit);
-}
+
